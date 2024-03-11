@@ -4,14 +4,14 @@ using org.ldk.util;
 using org.ldk.impl;
 
 internal class InternalUtils {
-	public static T[] check_arr_len<T>(T[] arr, int length) {
+	public static T[] CheckArrLen<T>(T[] arr, int length) {
 		if (arr != null && arr.Length != length) {
 			throw new ArgumentException("Array must be of fixed size " + length + " but was of length " + arr.Length);
 		}
 		return arr;
 	}
 
-	public static byte[] convUInt5Array(UInt5[] u5s) {
+	public static byte[] ConvUInt5Array(UInt5[] u5s) {
 		if (u5s == null) return null;
 		byte[] res = new byte[u5s.Length];
 		for (int i = 0; i < u5s.Length; i++) {
@@ -20,25 +20,25 @@ internal class InternalUtils {
 		return res;
 	}
 
-	public static T[] mapArray<F, T>(F[] arr, Func<F, T> f) {
+	public static T[] MapArray<F, T>(F[] arr, Func<F, T> f) {
 		if (arr == null) return null;
 		T[] ret = new T[arr.Length];
 		for (int i = 0; i < arr.Length; i++) ret[i] = f(arr[i]);
 		return ret;
 	}
 
-	public static string decodeString(long strptr) {
-		byte[] bytes = decodeUint8Array(strptr);
+	public static string DecodeString(long strptr) {
+		byte[] bytes = DecodeUint8Array(strptr);
 		return Encoding.UTF8.GetString(bytes);
 	}
 
-	public static long encodeString(string s) {
+	public static long EncodeString(string s) {
 		byte[] bytes = Encoding.UTF8.GetBytes(s);
-		return encodeUint8Array(bytes);
+		return EncodeUint8Array(bytes);
 	}
 
 
-	public static int getArrayLength(long arrptr) {
+	public static int GetArrayLength(long arrptr) {
 		long len;
 		unsafe {
 			long* arrlen = (long*) arrptr;
@@ -51,25 +51,25 @@ internal class InternalUtils {
 	}
 
 
-	public static long getU64ArrayElem(long arrptr, int idx) {
+	public static long GetU64ArrayElem(long arrptr, int idx) {
 		unsafe {
 			long* arr = (long*) (arrptr + 8);
 			return arr[idx];
 		}
 	}
-	public static int getU32ArrayElem(long arrptr, int idx) {
+	public static int GetU32ArrayElem(long arrptr, int idx) {
 		unsafe {
 			int* arr = (int*) (arrptr + 8);
 			return arr[idx];
 		}
 	}
-	public static short getU16ArrayElem(long arrptr, int idx) {
+	public static short GetU16ArrayElem(long arrptr, int idx) {
 		unsafe {
 			short* arr = (short*) (arrptr + 8);
 			return arr[idx];
 		}
 	}
-	public static byte getU8ArrayElem(long arrptr, int idx) {
+	public static byte GetU8ArrayElem(long arrptr, int idx) {
 		unsafe {
 			byte* arr = (byte*) (arrptr + 8);
 			return arr[idx];
@@ -77,8 +77,8 @@ internal class InternalUtils {
 	}
 
 
-	public static long encodeUint8Array(byte[] arr) {
-		long buf = bindings.allocate_buffer(arr.Length + 8);
+	public static long EncodeUint8Array(byte[] arr) {
+		long buf = Bindings.AllocateBuffer(arr.Length + 8);
 		unsafe { *((long*)buf) = (long)arr.Length; }
 		for (int i = 0; i < arr.Length; i++) {
 			unsafe {
@@ -87,8 +87,8 @@ internal class InternalUtils {
 		}
 		return buf;
 	}
-	public static long encodeUint16Array(short[] arr) {
-		long buf = bindings.allocate_buffer(arr.Length * 2 + 8);
+	public static long EncodeUint16Array(short[] arr) {
+		long buf = Bindings.AllocateBuffer(arr.Length * 2 + 8);
 		unsafe { *((long*)buf) = (long)arr.Length; }
 		for (int i = 0; i < arr.Length; i++) {
 			unsafe {
@@ -97,8 +97,8 @@ internal class InternalUtils {
 		}
 		return buf;
 	}
-	public static long encodeUint32Array(int[] arr) {
-		long buf = bindings.allocate_buffer(arr.Length * 4 + 8);
+	public static long EncodeUint32Array(int[] arr) {
+		long buf = Bindings.AllocateBuffer(arr.Length * 4 + 8);
 		unsafe { *((long*)buf) = (long)arr.Length; }
 		for (int i = 0; i < arr.Length; i++) {
 			unsafe {
@@ -107,8 +107,8 @@ internal class InternalUtils {
 		}
 		return buf;
 	}
-	public static long encodeUint64Array(long[] arr) {
-		long buf = bindings.allocate_buffer(arr.Length * 8 + 8);
+	public static long EncodeUint64Array(long[] arr) {
+		long buf = Bindings.AllocateBuffer(arr.Length * 8 + 8);
 		unsafe { *((long*)buf) = (long)arr.Length; }
 		for (int i = 0; i < arr.Length; i++) {
 			unsafe {
@@ -119,28 +119,28 @@ internal class InternalUtils {
 	}
 
 
-	public static byte[] decodeUint8Array(long arrptr) {
-		int len = getArrayLength(arrptr);
+	public static byte[] DecodeUint8Array(long arrptr) {
+		int len = GetArrayLength(arrptr);
 		byte[] res = new byte[len];
 		for (int i = 0; i < len; i++)
-			res[i] = getU8ArrayElem(arrptr, i);
-		bindings.free_buffer(arrptr);
+			res[i] = GetU8ArrayElem(arrptr, i);
+		Bindings.FreeBuffer(arrptr);
 		return res;
 	}
-	public static short[] decodeUint16Array(long arrptr) {
-		int len = getArrayLength(arrptr);
+	public static short[] DecodeUint16Array(long arrptr) {
+		int len = GetArrayLength(arrptr);
 		short[] res = new short[len];
 		for (int i = 0; i < len; i++)
-			res[i] = getU16ArrayElem(arrptr, i);
-		bindings.free_buffer(arrptr);
+			res[i] = GetU16ArrayElem(arrptr, i);
+		Bindings.FreeBuffer(arrptr);
 		return res;
 	}
-	public static long[] decodeUint64Array(long arrptr) {
-		int len = getArrayLength(arrptr);
+	public static long[] DecodeUint64Array(long arrptr) {
+		int len = GetArrayLength(arrptr);
 		long[] res = new long[len];
 		for (int i = 0; i < len; i++)
-			res[i] = getU64ArrayElem(arrptr, i);
-		bindings.free_buffer(arrptr);
+			res[i] = GetU64ArrayElem(arrptr, i);
+		Bindings.FreeBuffer(arrptr);
 		return res;
 	}
 }
