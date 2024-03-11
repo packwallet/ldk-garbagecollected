@@ -2,6 +2,9 @@ name: Continuous Integration Checks
 
 on: [push, pull_request]
 
+env:
+  NUGET_PACKAGE_VERSION: 0.0.0.5
+
 jobs:
   wasm_bindings:
     runs-on: ubuntu-latest
@@ -55,6 +58,9 @@ jobs:
           for i in 1 2 3 4 5; do
             ./genbindings.sh ../rust-lightning false && break
           done
+      - name: Set package version
+        run: |
+          echo "LDK_GARBAGECOLLECTED_GIT_OVERRIDE=v$NUGET_PACKAGE_VERSION" >> "$GITHUB_ENV"          
       - name: Build and Test TS Debug Bindings for Node
         run: |
           # We need FinalizationRegistry and top-level await support, which requires node 14.6/8,
@@ -156,6 +162,9 @@ jobs:
           for i in 1 2 3 4 5; do
             ./genbindings.sh ../rust-lightning true && break
           done
+      - name: Set package version
+        run: |
+          echo "LDK_GARBAGECOLLECTED_GIT_OVERRIDE=v$NUGET_PACKAGE_VERSION" >> "$GITHUB_ENV"
       - name: Build and Test C# Debug Bindings
         run: |
           ./genbindings.sh ./ldk-c-bindings/ c_sharp true true
@@ -172,6 +181,8 @@ jobs:
     container: fedora:39
     strategy:
       fail-fast: false
+    env:
+      DOTNET_NOLOGO: true
     steps:
       - name: Install required dependencies
         run: |
@@ -210,23 +221,22 @@ jobs:
           ./genbindings.sh ../rust-lightning true
       - name: Remove checked-in source to ensure its correctly checked-in
         run: rm c_sharp/src/org/ldk/enums/*.cs c_sharp/src/org/ldk/impl/*.cs c_sharp/src/org/ldk/structs/*.cs
+      - name: Set package version
+        run: |
+          echo "LDK_GARBAGECOLLECTED_GIT_OVERRIDE=v$(dotnet fsi nugetPreRelease.fsx $NUGET_PACKAGE_VERSION)" >> "$GITHUB_ENV"
       - name: Build Windows C# Bindings
         run: |
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           LDK_TARGET=x86_64-pc-windows-gnu LDK_TARGET_CPU=sandybridge ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build Linux C# Bindings
         run: |
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build macOS x86-64 C# Bindings
         run: |
           export MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers"
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           CC=clang LDK_TARGET=x86_64-apple-darwin LDK_TARGET_CPU=sandybridge ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build macOS aarch64 C# Bindings
         run: |
           export MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers"
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           CC=clang LDK_TARGET=aarch64-apple-darwin LDK_TARGET_CPU=apple-a14 ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build Release NUPKG
         run: |
@@ -234,8 +244,13 @@ jobs:
           ./build-release-nupkg.sh
       - uses: actions/upload-artifact@v3
         with:
-          name: org.ldk.nupkg
-          path: c_sharp/org.ldk.nupkg
+          name: LdkSharp.nupkg
+          path: c_sharp/LdkSharp.nupkg
+      - name: Publish nuget package on nuget.org
+        run: |
+          if [ ${{ secrets.NUGET_API_KEY }} ]; then
+            dotnet nuget push c_sharp/LdkSharp.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+          fi
 
   java_bindings:
     runs-on: ubuntu-latest
@@ -288,6 +303,9 @@ jobs:
           for i in 1 2 3 4 5; do
             ./genbindings.sh ../rust-lightning true && break
           done
+      - name: Set package version
+        run: |
+          echo "LDK_GARBAGECOLLECTED_GIT_OVERRIDE=v$NUGET_PACKAGE_VERSION" >> "$GITHUB_ENV"
       - name: Build Java Debug Bindings
         run: ./genbindings.sh ./ldk-c-bindings/ "-I/usr/lib/jvm/java-17-openjdk-amd64/include/ -I/usr/lib/jvm/java-17-openjdk-amd64/include/linux/" true false
       - name: Run Java Tests against Debug Bindings
