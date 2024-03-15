@@ -54,10 +54,7 @@ jobs:
         run: |
           cd ldk-c-bindings
           git config --global safe.directory "*"
-          # this may segfault, so retry several times
-          for i in 1 2 3 4 5; do
-            ./genbindings.sh ../rust-lightning false && break
-          done
+          ./genbindings.sh ../rust-lightning false
       - name: Set package version
         run: |
           echo "LDK_GARBAGECOLLECTED_GIT_OVERRIDE=v$NUGET_PACKAGE_VERSION" >> "$GITHUB_ENV"          
@@ -158,10 +155,7 @@ jobs:
         run: |
           cd ldk-c-bindings
           git config --global safe.directory "*"
-          # this may segfault, so retry several times
-          for i in 1 2 3 4 5; do
-            ./genbindings.sh ../rust-lightning true && break
-          done
+          ./genbindings.sh ../rust-lightning true
       - name: Set package version
         run: |
           echo "LDK_GARBAGECOLLECTED_GIT_OVERRIDE=v$NUGET_PACKAGE_VERSION" >> "$GITHUB_ENV"
