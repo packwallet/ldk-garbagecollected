@@ -247,6 +247,7 @@ jobs:
           name: LdkSharp.nupkg
           path: c_sharp/LdkSharp.nupkg
       - name: Publish nuget package on nuget.org
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           if [ ${{ secrets.NUGET_API_KEY }} ]; then
             dotnet nuget push c_sharp/LdkSharp.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
