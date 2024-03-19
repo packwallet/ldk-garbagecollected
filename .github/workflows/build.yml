@@ -3,7 +3,7 @@ name: Continuous Integration Checks
 on: [push, pull_request]
 
 env:
-  NUGET_PACKAGE_VERSION: 0.0.0.5
+  NUGET_PACKAGE_VERSION: 0.0.0.6
 
 jobs:
   wasm_bindings:
